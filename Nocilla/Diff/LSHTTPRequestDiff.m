@@ -7,11 +7,13 @@
 - (BOOL)isMethodDifferent;
 - (BOOL)isUrlDifferent;
 - (BOOL)areHeadersDifferent;
+- (BOOL)areParametersDifferent;
 - (BOOL)isBodyDifferent;
 
 - (void)appendMethodDiff:(NSMutableString *)diff;
 - (void)appendUrlDiff:(NSMutableString *)diff;
 - (void)appendHeadersDiff:(NSMutableString *)diff;
+- (void)appendParametersDiff:(NSMutableString *)diff;
 - (void)appendBodyDiff:(NSMutableString *)diff;
 @end
 
@@ -29,6 +31,7 @@
     if ([self isMethodDifferent] ||
         [self isUrlDifferent] ||
         [self areHeadersDifferent] ||
+        [self areParametersDifferent] ||
         [self isBodyDifferent]) {
         return NO;
     }
@@ -45,6 +48,9 @@
     }
     if([self areHeadersDifferent]) {
         [self appendHeadersDiff:diff];
+    }
+    if ([self areParametersDifferent]) {
+        [self appendParametersDiff:diff];
     }
     if([self isBodyDifferent]) {
         [self appendBodyDiff:diff];
@@ -63,6 +69,10 @@
 
 - (BOOL)areHeadersDifferent {
     return ![self.oneRequest.headers isEqual:self.anotherRequest.headers];
+}
+
+- (BOOL)areParametersDifferent {
+    return ![self.oneRequest.parameters isEqual:self.anotherRequest.parameters];
 }
 
 - (BOOL)isBodyDifferent {
@@ -98,6 +108,28 @@
     for (NSString *header in sortedHeadersInTheOtherButNotInOne) {
         NSString *value = [self.anotherRequest.headers objectForKey:header];
         [diff appendFormat:@"+\t\"%@\": \"%@\"\n", header, value];
+    }
+}
+
+- (void)appendParametersDiff:(NSMutableString *)diff {
+    [diff appendString:@"  Parameters:\n"];
+    NSSet *parametersInOneButNotInTheOther = [self.oneRequest.parameters keysOfEntriesPassingTest:^BOOL(id key, id obj, BOOL *stop) {
+        return ![self.anotherRequest.parameters objectForKey:key] || ![obj isEqual:[self.anotherRequest.parameters objectForKey:key]];
+    }];
+    NSSet *parametersInTheOtherButNotInOne = [self.anotherRequest.parameters keysOfEntriesPassingTest:^BOOL(id key, id obj, BOOL *stop) {
+        return ![self.oneRequest.parameters objectForKey:key] || ![obj isEqual:[self.oneRequest.parameters objectForKey:key]];
+    }];
+
+    NSArray *descriptors = @[[NSSortDescriptor sortDescriptorWithKey:@"" ascending:YES]];
+    NSArray * sortedParametersInOneButNotInTheOther = [parametersInOneButNotInTheOther sortedArrayUsingDescriptors:descriptors];
+    NSArray * sortedParametersInTheOtherButNotInOne = [parametersInTheOtherButNotInOne sortedArrayUsingDescriptors:descriptors];
+    for (NSString *parameter in sortedParametersInOneButNotInTheOther) {
+        NSString *value = [self.oneRequest.parameters objectForKey:parameter];
+        [diff appendFormat:@"-\t\"%@\": \"%@\"\n", parameter, value];
+    }
+    for (NSString *parameter in sortedParametersInTheOtherButNotInOne) {
+        NSString *value = [self.anotherRequest.parameters objectForKey:parameter];
+        [diff appendFormat:@"+\t\"%@\": \"%@\"\n", parameter, value];
     }
 }
 

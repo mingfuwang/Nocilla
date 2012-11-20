@@ -29,6 +29,20 @@
         [result appendString:[headerElements componentsJoinedByString:@", "]];
         [result appendString:@" })"];
     }
+    if (self.request.parameters.count) {
+        [result appendString:@".\nwithParameters(@{ "];
+        NSMutableArray *parameterElements = [NSMutableArray arrayWithCapacity:self.request.parameters.count];
+
+        NSArray *descriptors = @[[NSSortDescriptor sortDescriptorWithKey:@"" ascending:YES]];
+        NSArray *sortedParameters = [[self.request.parameters allKeys] sortedArrayUsingDescriptors:descriptors];
+
+        for (NSString *parameter in sortedParameters) {
+            NSString *value = [self.request.parameters objectForKey:parameter];
+            [parameterElements addObject:[NSString stringWithFormat:@"@\"%@\": @\"%@\"", parameter, value]];
+        }
+        [result appendString:[parameterElements componentsJoinedByString:@", "]];
+        [result appendString:@" })"];
+    }
     if (self.request.body.length) {
         NSString *escapedBody = [[NSString alloc] initWithData:self.request.body encoding:NSUTF8StringEncoding];
         escapedBody = [escapedBody stringByReplacingOccurrencesOfString:@"\"" withString:@"\\\""];

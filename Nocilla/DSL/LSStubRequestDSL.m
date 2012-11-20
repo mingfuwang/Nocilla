@@ -33,6 +33,23 @@
     };
 }
 
+- (WithParametersMethod)withParameters {
+    return ^(NSDictionary *parameters) {
+        for (NSString *parameter in parameters) {
+            NSString *value = [parameters objectForKey:parameter];
+            [self.request setParameter:parameter value:value];
+        }
+        return self;
+    };
+}
+
+- (WithParameterMethod)withParameter {
+    return ^(NSString * parameter, NSString * value) {
+        [self.request setParameter:parameter value:value];
+        return self;
+    };
+}
+
 - (AndBodyMethod)withBody {
     return ^(NSString *body) {
         self.request.body = [body dataUsingEncoding:NSUTF8StringEncoding];

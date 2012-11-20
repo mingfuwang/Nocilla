@@ -78,7 +78,45 @@ describe(@"#matchesRequest:", ^{
             [[theValue([right matchesRequest:left]) should] beYes];
         });
     });
-    
+
+    context(@"when the left request has a subset of params of the right request", ^{
+        __block LSStubRequest *left = nil;
+        __block LSStubRequest *right = nil;
+        beforeEach(^{
+            left = [[LSStubRequest alloc] initWithMethod:@"PUT" url:@"https://api.example.com/cats/whiskas.json"];
+            [left setParameter:@"meows" value:@"true"];
+
+            right = [[LSStubRequest alloc] initWithMethod:@"PUT" url:@"https://api.example.com/cats/whiskas.json"];
+            [right setParameter:@"meows" value:@"true"];
+            [right setParameter:@"nyan" value:@"purr"];
+        });
+        describe(@"the left request", ^{
+            it(@"should match the right request", ^{
+                [[theValue([left matchesRequest:right]) should] beYes];
+            });
+        });
+        describe(@"the right request", ^{
+            it(@"should not match the left request", ^{
+                [[theValue([right matchesRequest:left]) should] beNo];
+            });
+        });
+    });
+    context(@"when the both requests have the same params", ^{
+        __block LSStubRequest *left = nil;
+        __block LSStubRequest *right = nil;
+        beforeEach(^{
+            left = [[LSStubRequest alloc] initWithMethod:@"PUT" url:@"https://api.example.com/cats/whiskas.json"];
+            [left setParameter:@"meows" value:@"true"];
+
+            right = [[LSStubRequest alloc] initWithMethod:@"PUT" url:@"https://api.example.com/cats/whiskas.json"];
+            [right setParameter:@"meows" value:@"true"];
+        });
+        it(@"should match each other", ^{
+            [[theValue([left matchesRequest:right]) should] beYes];
+            [[theValue([right matchesRequest:left]) should] beYes];
+        });
+    });
+
     context(@"when both requests have the same body", ^{
         __block LSStubRequest *left = nil;
         __block LSStubRequest *right = nil;

@@ -9,12 +9,14 @@
 @property (nonatomic, assign, readonly) NSString *method;
 @property (nonatomic, strong, readonly) NSURL *url;
 @property (nonatomic, strong, readonly) NSDictionary *headers;
+@property (nonatomic, strong, readonly) NSDictionary *parameters;
 @property (nonatomic, strong, readwrite) NSData *body;
 
 @property (nonatomic, strong) LSStubResponse *response;
 
 - (id)initWithMethod:(NSString *)method url:(NSString *)url;
 - (void)setHeader:(NSString *)header value:(NSString *)value;
+- (void)setParameter:(NSString *)parameter value:(NSString *)value;
 
 - (BOOL)matchesRequest:(id<LSHTTPRequest>)request;
 @end

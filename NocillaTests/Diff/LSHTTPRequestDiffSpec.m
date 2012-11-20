@@ -147,6 +147,68 @@ describe(@"diffing two LSHTTPRequests", ^{
 
         });
     });
+
+    context(@"when the request differ in one parameter", ^{
+        beforeEach(^{
+            oneRequest = [[LSStubRequest alloc] initWithMethod:@"GET" url:@"http://www.google.com/search"];
+            [oneRequest setParameter:@"q" value:@"nocilla"];
+            anotherRequest = [[LSStubRequest alloc] initWithMethod:@"GET" url:@"http://www.google.com/search"];
+        });
+        it(@"should not be empty", ^{
+            diff = [[LSHTTPRequestDiff alloc] initWithRequest:oneRequest andRequest:anotherRequest];
+            [[theValue(diff.isEmpty) should] beNo];
+        });
+        context(@"in one direction", ^{
+            beforeEach(^{
+                diff = [[LSHTTPRequestDiff alloc] initWithRequest:oneRequest andRequest:anotherRequest];
+            });
+            it(@"should have a description representing the diff", ^{
+                NSString *expected = @"  Parameters:\n-\t\"q\": \"nocilla\"\n";
+                [[[diff description] should] equal:expected];
+            });
+        });
+        context(@"in the other direction", ^{
+            beforeEach(^{
+                diff = [[LSHTTPRequestDiff alloc] initWithRequest:anotherRequest andRequest:oneRequest];
+            });
+            it(@"should have a description representing the diff", ^{
+                NSString *expected = @"  Parameters:\n+\t\"q\": \"nocilla\"\n";
+                [[[diff description] should] equal:expected];
+            });
+        });
+    });
+
+    context(@"when the request differ in one parameter each", ^{
+        beforeEach(^{
+            oneRequest = [[LSStubRequest alloc] initWithMethod:@"GET" url:@"http://www.google.com/search"];
+            [oneRequest setParameter:@"q" value:@"nocilla"];
+            anotherRequest = [[LSStubRequest alloc] initWithMethod:@"GET" url:@"http://www.google.com/search"];
+            [anotherRequest setParameter:@"sourceid" value:@"chrome"];
+        });
+        it(@"should not be empty", ^{
+            diff = [[LSHTTPRequestDiff alloc] initWithRequest:oneRequest andRequest:anotherRequest];
+            [[theValue(diff.isEmpty) should] beNo];
+        });
+        context(@"in one direction", ^{
+            beforeEach(^{
+                diff = [[LSHTTPRequestDiff alloc] initWithRequest:oneRequest andRequest:anotherRequest];
+            });
+            it(@"should have a description representing the diff", ^{
+                NSString *expected = @"  Parameters:\n-\t\"q\": \"nocilla\"\n+\t\"sourceid\": \"chrome\"\n";
+                [[[diff description] should] equal:expected];
+            });
+        });
+        context(@"in the other direction", ^{
+            beforeEach(^{
+                diff = [[LSHTTPRequestDiff alloc] initWithRequest:anotherRequest andRequest:oneRequest];
+            });
+            it(@"should have a description representing the diff", ^{
+                NSString *expected = @"  Parameters:\n-\t\"sourceid\": \"chrome\"\n+\t\"q\": \"nocilla\"\n";
+                [[[diff description] should] equal:expected];
+            });
+        });
+    });
+
     context(@"when the requests differ in the body", ^{
         beforeEach(^{
             oneRequest = [[LSStubRequest alloc] initWithMethod:@"GET" url:@"http://www.google.com"];
@@ -239,10 +301,12 @@ describe(@"diffing two LSHTTPRequests", ^{
             [oneRequest setHeader:@"X-API-TOKEN" value:@"123456789"];
             [oneRequest setHeader:@"Accept" value:@"application/json"];
             [oneRequest setHeader:@"X-Custom-Header" value:@"Really??"];
+            [oneRequest setParameter:@"timestamp" value:@"now"];
             [oneRequest setBody:[@"This is a body" dataUsingEncoding:NSUTF8StringEncoding]];
             anotherRequest = [[LSStubRequest alloc] initWithMethod:@"GET" url:@"http://www.luissolano.com"];
             [anotherRequest setHeader:@"X-API-TOKEN" value:@"123456789"];
             [anotherRequest setHeader:@"X-APP-ID" value:@"Nocilla"];
+            [anotherRequest setParameter:@"timestamp" value:@"later"];
             [anotherRequest setBody:[@"This is THE body" dataUsingEncoding:NSUTF8StringEncoding]];
         });
         context(@"in one direction", ^{
@@ -250,7 +314,19 @@ describe(@"diffing two LSHTTPRequests", ^{
                 diff = [[LSHTTPRequestDiff alloc] initWithRequest:oneRequest andRequest:anotherRequest]; 
             });
             it(@"should have a description representing the diff", ^{
-                NSString *expected = @"- Method: PUT\n+ Method: GET\n- URL: https://www.google.it\n+ URL: http://www.luissolano.com\n  Headers:\n-\t\"Accept\": \"application/json\"\n-\t\"X-Custom-Header\": \"Really??\"\n+\t\"X-APP-ID\": \"Nocilla\"\n- Body: \"This is a body\"\n+ Body: \"This is THE body\"\n";
+                NSString *expected = @"- Method: PUT\n"
+                                     @"+ Method: GET\n"
+                                     @"- URL: https://www.google.it\n"
+                                     @"+ URL: http://www.luissolano.com\n"
+                                     @"  Headers:\n"
+                                     @"-\t\"Accept\": \"application/json\"\n"
+                                     @"-\t\"X-Custom-Header\": \"Really??\"\n"
+                                     @"+\t\"X-APP-ID\": \"Nocilla\"\n"
+                                     @"  Parameters:\n"
+                                     @"-\t\"timestamp\": \"now\"\n"
+                                     @"+\t\"timestamp\": \"later\"\n"
+                                     @"- Body: \"This is a body\"\n"
+                                     @"+ Body: \"This is THE body\"\n";
                 [[[diff description] should] equal:expected];
             });
         });
@@ -259,7 +335,19 @@ describe(@"diffing two LSHTTPRequests", ^{
                diff = [[LSHTTPRequestDiff alloc] initWithRequest:anotherRequest andRequest:oneRequest]; 
             });
             it(@"should have a description representing the diff", ^{
-                NSString *expected = @"- Method: GET\n+ Method: PUT\n- URL: http://www.luissolano.com\n+ URL: https://www.google.it\n  Headers:\n-\t\"X-APP-ID\": \"Nocilla\"\n+\t\"Accept\": \"application/json\"\n+\t\"X-Custom-Header\": \"Really??\"\n- Body: \"This is THE body\"\n+ Body: \"This is a body\"\n";
+                NSString *expected = @"- Method: GET\n"
+                                     @"+ Method: PUT\n"
+                                     @"- URL: http://www.luissolano.com\n"
+                                     @"+ URL: https://www.google.it\n"
+                                     @"  Headers:\n"
+                                     @"-\t\"X-APP-ID\": \"Nocilla\"\n"
+                                     @"+\t\"Accept\": \"application/json\"\n"
+                                     @"+\t\"X-Custom-Header\": \"Really??\"\n"
+                                     @"  Parameters:\n"
+                                     @"-\t\"timestamp\": \"later\"\n"
+                                     @"+\t\"timestamp\": \"now\"\n"
+                                     @"- Body: \"This is THE body\"\n"
+                                     @"+ Body: \"This is a body\"\n";
                 [[[diff description] should] equal:expected];
             });
         });

@@ -41,9 +41,9 @@
     NSData *body = nil;
     if (stubbedRequest) {
         urlResponse = [[NSHTTPURLResponse alloc] initWithURL:request.URL
-                                                                 statusCode:stubbedResponse.statusCode
-                                                               headerFields:stubbedResponse.headers
-                                                                requestTime:0];
+                                                  statusCode:stubbedResponse.statusCode
+                                                headerFields:stubbedResponse.headers
+                                                 requestTime:0];
         body = stubbedResponse.body;
     } else {
         urlResponse = [[NSHTTPURLResponse alloc] initWithURL:request.URL statusCode:500 headerFields:@{ @"X-Nocilla" : @"Unexpected Request" } requestTime:0];

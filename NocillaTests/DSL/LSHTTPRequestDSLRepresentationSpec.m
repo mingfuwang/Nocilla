@@ -58,6 +58,29 @@ describe(@"description", ^{
             [[[dsl description] should] equal:@"stubRequest(@\"POST\", @\"http://luissolano.com\").\nwithHeaders(@{ @\"X-MY-HEADER\": @\"quote\"quoute\" });"];
         });
     });
+    describe(@"a request with one parameter", ^{
+        beforeEach(^{
+            LSStubRequest *request = [[LSStubRequest alloc] initWithMethod:@"GET" url:@"http://github.com/modocache"];
+            [request setParameter:@"tab" value:@"activity"];
+            dsl = [[LSHTTPRequestDSLRepresentation alloc] initWithRequest:request];
+        });
+        it(@"should return the DSL representation", ^{
+            [[[dsl description] should] equal:@"stubRequest(@\"GET\", @\"http://github.com/modocache\").\nwithParameters(@{ @\"tab\": @\"activity\" });"];
+        });
+    });
+    describe(@"a request with 3 parameters", ^{
+        beforeEach(^{
+            LSStubRequest *request = [[LSStubRequest alloc] initWithMethod:@"POST" url:@"https://www.google.com/search"];
+            [request setParameter:@"sourceid" value:@"chrome"];
+            [request setParameter:@"ie" value:@"UTF-8"];
+            [request setParameter:@"q" value:@"horadecruncho"];
+            dsl = [[LSHTTPRequestDSLRepresentation alloc] initWithRequest:request];
+        });
+        it(@"should return the DSL representation", ^{
+            NSString *expected = @"stubRequest(@\"POST\", @\"https://www.google.com/search\").\nwithParameters(@{ @\"ie\": @\"UTF-8\", @\"q\": @\"horadecruncho\", @\"sourceid\": @\"chrome\" });";
+            [[[dsl description] should] equal:expected];
+        });
+    });
     describe(@"a request with headers and body", ^{
         beforeEach(^{
             LSStubRequest *request = [[LSStubRequest alloc] initWithMethod:@"POST" url:@"http://luissolano.com"];

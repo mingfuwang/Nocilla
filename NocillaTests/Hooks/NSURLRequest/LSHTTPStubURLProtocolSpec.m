@@ -139,7 +139,7 @@ describe(@"#startLoading", ^{
                 [[theValue(response.statusCode) should] equal:theValue(500)];
                 [[response.allHeaderFields should] equal:@{ @"X-Nocilla": @"Unexpected Request"}];
             });
-            it(@"should pass the body to the client with a meaninful message", ^{
+            it(@"should pass the body to the client with a meaningful message", ^{
                 NSString *expectedMessage = @"An unexcepted HTTP request was fired.\n\nUse this snippet to stub the request:\nstubRequest(@\"GET\", @\"http://api.example.com/dogs.xml\");\n";
                 [[client should] receive:@selector(URLProtocol:didLoadData:) withArguments:protocol, [expectedMessage dataUsingEncoding:NSUTF8StringEncoding]];
                 

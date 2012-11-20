@@ -6,6 +6,8 @@
 
 typedef LSStubRequestDSL *(^WithHeaderMethod)(NSString *, NSString *);
 typedef LSStubRequestDSL *(^WithHeadersMethod)(NSDictionary *);
+typedef LSStubRequestDSL *(^WithParameterMethod)(NSString *, NSString *);
+typedef LSStubRequestDSL *(^WithParametersMethod)(NSDictionary *);
 typedef LSStubRequestDSL *(^AndBodyMethod)(NSString *);
 typedef LSStubResponseDSL *(^AndReturnMethod)(NSInteger);
 
@@ -13,6 +15,8 @@ typedef LSStubResponseDSL *(^AndReturnMethod)(NSInteger);
 - (id)initWithRequest:(LSStubRequest *)request;
 - (WithHeaderMethod)withHeader;
 - (WithHeadersMethod)withHeaders;
+- (WithParameterMethod)withParameter;
+- (WithParametersMethod)withParameters;
 - (AndBodyMethod)withBody;
 - (AndReturnMethod)andReturn;
 @end
